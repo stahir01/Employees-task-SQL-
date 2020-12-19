@@ -1,0 +1,106 @@
+CREATE TABLE employees(
+	employee_ID INT PRIMARY KEY,
+	first_name varchar(56) NOT NULL,
+	last_name VARCHAR(56),
+	charge_rate INT NOT NULL
+);
+CREATE SEQUENCE employeeID_seq 
+INCREMENT 100
+START 100000;
+
+/*We can aslo use SERIAL in employee_ID to create a sequence but if 
+we want Serial to change our way then we use this way */
+
+CREATE TABLE project(
+	project_ID INT PRIMARY KEY,
+	project_des VARCHAR(256) NOT NULL
+);
+
+CREATE SEQUENCE project_seq
+START 1000
+INCREMENT 100;
+
+
+CREATE TABLE task(
+	task_ID SERIAL PRIMARY KEY,
+	project_ID INT NOT NULL,
+	task_description varchar(256) NOT NULL,
+	CONSTRAINT  project_ID FOREIGN KEY(project_ID) REFERENCES project(project_ID)
+);
+
+CREATE TABLE employee_task(
+	employee_task_ID INT PRIMARY KEY,
+	task_ID INT NOT NULL,
+	employee_ID INT NOT NULL,
+	start_time time NOT NULL,
+	end_time time NOT NULL,
+	time_worked time NOT NULL, /* Check whether this is correct or not */
+	CONSTRAINT task_ID FOREIGN KEY(task_ID) REFERENCES task(task_ID),
+	CONSTRAINT employee_ID FOREIGN KEY(employee_ID) REFERENCES employees(employee_ID)
+);
+
+CREATE SEQUENCE employee_task_ID_seq
+START 100
+INCREMENT 25;
+
+
+INSERT INTO employees(employee_ID, first_name, last_name, charge_rate)
+VALUES(nextval('employeeID_seq'), 'Miruna', 'Elena', 20);
+INSERT INTO employees(employee_ID, first_name, last_name, charge_rate)
+VALUES(nextval('employeeID_seq'), 'Hamza', 'Imran', 20);
+INSERT INTO employees(employee_ID, first_name, last_name, charge_rate)
+VALUES(nextval('employeeID_seq'), 'Ahmed', 'Kashan', 30);
+INSERT INTO employees(employee_ID, first_name, last_name, charge_rate)
+VALUES(nextval('employeeID_seq'), 'Keyan', 'Ali', 56);
+
+SELECT * FROM employees;
+
+
+
+-- We create a project for example project 1, we have to clean up the place
+INSERT INTO project(project_ID, project_des)
+VALUES(nextval('project_seq'), 'Cleaning the place');
+
+SELECT * FROM project;
+-- Inside the project we will create task like what has to be done in project 1
+-- We use the same project ID as both of these tasks are part of the same project
+
+INSERT INTO task(task_ID, project_ID, task_description)
+VALUES(DEFAULT, currval('project_seq'), 'Clean the floor');
+INSERT INTO task(task_ID, project_ID, task_description)
+VALUES(DEFAULT, currval('project_seq'), 'Clean the windows');
+
+SELECT * FROM task
+
+INSERT INTO employee_task(employee_task_ID, task_ID, employee_ID, start_time, end_time, time_worked)
+VALUES(nextval('employee_task_ID_seq'), currval('task_task_ID_seq'), currval('employeeID_seq'), '12:00:00', '14:00:00', '2:00:00');
+-- Check code from here
+INSERT INTO employee_task(employee_task_ID, task_ID, employee_ID, start_time, end_time, time_worked)
+VALUES(nextval('employee_task_ID_seq'), currval('task_task_ID_seq'), currval('employeeID_seq'), '09:35:00', '10:31:00', SELECT TIMEDIFF('12:00:00', '14:00:00'));
+
+SELECT * FROM employee_task;
+
+-- Now we create a second project
+INSERT INTO project(project_ID, project_des)
+VALUES(nextval('project_seq'), 'Clean the dishes');
+
+--Now we create tasks for this project
+INSERT INTO task(task_ID, project_ID, task_description)
+VALUES(DEFAULT, currval('project_seq'), 'Clean the dishes using soap');
+INSERT INTO task(task_ID, project_ID, task_description)
+VALUES(DEFAULT, currval('project_seq'), 'Dry the dishes');
+
+INSERT INTO employee_task(employee_task_ID, task_ID, employee_ID, start_time, end_time, time_worked)
+VALUES(nextval('employee_task_ID_seq'), currval('task_ID'), currval('employeeID_seq'), '19:35:00', '19:45:00', TIMEDIFF(end_time, start_time));
+INSERT INTO employee_task(employee_task_ID, task_ID, employee_ID, start_time, end_time, time_worked)
+VALUES(nextval('employee_task_ID_seq'), currval('task_ID'), currval('employeeID_seq'), '19:50:35', '19:51:52', TIMEDIFF(end_time, start_time));
+
+SELECT * FROM project;
+SELECT * FROM task;
+SELECT * FROM employee_task;
+
+
+
+
+
+
